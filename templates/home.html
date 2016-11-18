@@ -49,6 +49,10 @@
                 {{ dform.key }}<br><br>
                 {{ dform.delete }}
             </fieldset>
+        </form><br>
+        <form method="POST">
+            {{ reset.hidden_tag() }}
+            <b>Reset All Data: </b> {{ reset.reset }}
         </form>
     </div>
     <br>

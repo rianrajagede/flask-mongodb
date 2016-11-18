@@ -22,6 +22,9 @@ class UpdateTask(Form):
     priority = IntegerField('Priority')
     update = SubmitField('Update')
 
+class ResetTask(Form):
+    reset = SubmitField('Reset')
+
 def createTask(form):
     title = form.title.data
     priority = form.priority.data
@@ -41,17 +44,24 @@ def updateTask(form):
     r.set(key,'{"title":"'+str(title)+'","priority":"'+str(priority)+'"}')
     return redirect('/')
 
+def resetTask(form):
+    r.flushall()
+    return redirect('/')
+
 @app.route('/', methods=['GET','POST'])
 def main():
     cform = CreateTask(prefix='cform')
     dform = DeleteTask(prefix='dform')
     uform = UpdateTask(prefix='uform')
+    reset = ResetTask(prefix='reset')
     if cform.validate_on_submit() and cform.create.data:
         return createTask(cform)
     if dform.validate_on_submit() and dform.delete.data:
         return deleteTask(dform)
     if uform.validate_on_submit() and uform.update.data:
         return updateTask(uform)
+    if reset.validate_on_submit() and reset.reset.data:
+        return resetTask(reset)
 
     keys = r.keys()
     val = {}
@@ -60,15 +70,7 @@ def main():
             val[i]=json.loads(r[i])
 
     return render_template('home.html', cform = cform, dform = dform, uform = uform, \
-                keys = keys, val = val)
-
-@app.route('/delete')
-def delete():
-    return "Deleted"
-
-@app.route('/update')
-def update():
-    return "Updated"
+                keys = keys, val = val, reset = reset)
 
 if __name__=='__main__':
     if(r.exists('id')==False):
