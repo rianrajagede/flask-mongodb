@@ -3,6 +3,7 @@ from flask_wtf import Form
 from wtforms import TextField, IntegerField, SubmitField
 import redis, json
 
+# config system
 app = Flask(__name__)
 app.config.update(dict(SECRET_KEY='yoursecretkey'))
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
@@ -28,6 +29,8 @@ class ResetTask(Form):
 def createTask(form):
     title = form.title.data
     priority = form.priority.data
+
+    # set auto-generated key
     r.set('T'+str(r.get('id')),'{"title":"'+str(title)+'","priority":"'+str(priority)+'"}')
     r.incr('id')
     return redirect('/')
@@ -41,6 +44,8 @@ def updateTask(form):
     title = form.title.data
     priority = form.priority.data
     key = form.key.data
+
+    # update by "reset"
     r.set(key,'{"title":"'+str(title)+'","priority":"'+str(priority)+'"}')
     return redirect('/')
 
@@ -50,10 +55,13 @@ def resetTask(form):
 
 @app.route('/', methods=['GET','POST'])
 def main():
+    # create form
     cform = CreateTask(prefix='cform')
     dform = DeleteTask(prefix='dform')
     uform = UpdateTask(prefix='uform')
     reset = ResetTask(prefix='reset')
+
+    # response
     if cform.validate_on_submit() and cform.create.data:
         return createTask(cform)
     if dform.validate_on_submit() and dform.delete.data:
@@ -63,6 +71,7 @@ def main():
     if reset.validate_on_submit() and reset.reset.data:
         return resetTask(reset)
 
+    # get all data
     keys = r.keys()
     val = {}
     for i in keys:
@@ -73,6 +82,8 @@ def main():
                 keys = keys, val = val, reset = reset)
 
 if __name__=='__main__':
+    # set auto-generated key
     if(r.exists('id')==False):
         r.set('id','0')
+
     app.run(debug=True)
