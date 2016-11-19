@@ -2,6 +2,8 @@
 
 This is a simple example of Python Flask's usage as a simple "Task Manager" using Redis as Database Management System.
 
+> **NOTE** : It works only on Ubuntu
+
 ### Installation
 
 run this following command:
