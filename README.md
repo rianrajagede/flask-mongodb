@@ -9,7 +9,7 @@ This is a simple example of Python Flask's usage as a simple "Task Manager" usin
 run this following command:
 
 ```
-$ sudo pip install requirements.txt
+$ sudo pip install -r requirements.txt
 ```
 
 It will install Flask, Flask-WTF, and Redis.
