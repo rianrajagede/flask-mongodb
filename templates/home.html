@@ -23,6 +23,8 @@
                 <legend>Create Task</legend>
                 {{ cform.title.label }}<br>
                 {{ cform.title }}<br>
+                {{ cform.shortdesc.label }}<br>
+                {{ cform.shortdesc }}<br>
                 {{ cform.priority.label }}<br>
                 {{ cform.priority }}<br><br>
                 {{ cform.create }}
@@ -36,6 +38,8 @@
                 {{ uform.key }}<br>
                 {{ uform.title.label }}<br>
                 {{ uform.title }}<br>
+                {{ uform.shortdesc.label }}<br>
+                {{ uform.shortdesc }}<br>
                 {{ uform.priority.label }}<br>
                 {{ uform.priority }}<br><br>
                 {{ uform.update }}
@@ -46,10 +50,13 @@
             <fieldset>
                 <legend>Delete Task</legend>
                 {{ dform.key.label }}<br>
-                {{ dform.key }}<br><br>
+                {{ dform.key }}<br>
+                <br>OR<br><br>
+                {{ dform.title.label }}<br>
+                {{ dform.title }}<br><br>
                 {{ dform.delete }}
             </fieldset>
-        </form><br>
+        </form>
         <form method="POST">
             {{ reset.hidden_tag() }}
             <b>Reset All Data: </b> {{ reset.reset }}
@@ -62,6 +69,7 @@
         {% if i!='id'%}
         Keys = {{ i }} <br>
         Title = {{ val[i]["title"] }}<br>
+        Short Description = {{ val[i]["shortdesc"] }} <br>
         Priority = {{ val[i]["priority"] }}<br><br>
         {% endif %}
     {% endfor %}
