@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>CRUD using REDIS</title>
+    <title>Simple Task Manager</title>
     <style>
         .newspaper {
             -webkit-column-count: 3; /* Chrome, Safari, Opera */
@@ -14,7 +14,8 @@
   </head>
   <body>
     <div class="head">
-        <h1>CRUD using REDIS</h1>
+        <h1>SIMPLE TASK MANAGER</h1>
+        <h2>using MongoDB</h2>
     </div>
     <div class="newspaper">
         <form method="POST">
@@ -33,15 +34,12 @@
         <form  method="POST">
             {{ uform.hidden_tag() }}
             <fieldset>
-                <legend>Update task</legend>
+                <legend>Update Description task</legend>
                 {{ uform.key.label }}<br>
-                {{ uform.key }}<br>
-                {{ uform.title.label }}<br>
-                {{ uform.title }}<br>
+                {{ uform.key }}<br><br>
+                Set Update<br><br>
                 {{ uform.shortdesc.label }}<br>
                 {{ uform.shortdesc }}<br>
-                {{ uform.priority.label }}<br>
-                {{ uform.priority }}<br><br>
                 {{ uform.update }}
             </fieldset>
         </form>
@@ -65,13 +63,11 @@
     <br>
     <br>
     <b>Tasks List:</b><br><br>
-    {% for i in keys %}
-        {% if i!='id'%}
-        Keys = {{ i }} <br>
-        Title = {{ val[i]["title"] }}<br>
-        Short Description = {{ val[i]["shortdesc"] }} <br>
-        Priority = {{ val[i]["priority"] }}<br><br>
-        {% endif %}
+    {% for i in data %}
+        ID = {{ i["id"] }} <br>
+        Title = {{ i["title"] }}<br>
+        Short Description = {{ i["shortdesc"] }} <br>
+        Priority = {{ i["priority"] }}<br><br>
     {% endfor %}
   </body>
 </html>

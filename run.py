@@ -1,76 +1,67 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_wtf import Form
-from wtforms import TextField, IntegerField, SubmitField
-import redis, json
+from pymongo import MongoClient
+from classes import *
 
 # config system
 app = Flask(__name__)
 app.config.update(dict(SECRET_KEY='yoursecretkey'))
-r = redis.StrictRedis(host='localhost', port=6379, db=0)
+client = MongoClient('localhost:27017')
+db = client.TaskManager
 
-# set auto-generated key
-if(r.exists('id')==False):
-    r.set('id','0')
+if db.settings.find({'name': 'task_id'}).count() <= 0:
+    print("task_id Not found, creating....")
+    db.settings.insert_one({'name':'task_id', 'value':0})
 
-class CreateTask(Form):
-    title = TextField('Task Title')
-    shortdesc = TextField('Short Description')
-    priority = IntegerField('Priority')
-    create = SubmitField('Create')
-
-class DeleteTask(Form):
-    key = TextField('Task Key')
-    title = TextField('Task Title')
-    delete = SubmitField('Delete')
-
-class UpdateTask(Form):
-    key = TextField('Task Key')
-    title = TextField('Task Title')
-    shortdesc = TextField('Short Description')
-    priority = IntegerField('Priority')
-    update = SubmitField('Update')
-
-class ResetTask(Form):
-    reset = SubmitField('Reset')
+def updateTaskID(value):
+    task_id = db.settings.find_one()['value']
+    task_id += value
+    db.settings.update_one(
+        {'name':'task_id'},
+        {'$set':
+            {'value':task_id}
+        })
 
 def createTask(form):
     title = form.title.data
     priority = form.priority.data
     shortdesc = form.shortdesc.data
-    task = {'title':title,'shortdesc':shortdesc,'priority':priority}
+    task_id = db.settings.find_one()['value']
+    
+    task = {'id':task_id, 'title':title, 'shortdesc':shortdesc, 'priority':priority}
 
-    # set auto-generated key
-    r.hmset('T'+str(r.get('id')),task)
-    r.incr('id')
+    db.tasks.insert_one(task)
+    updateTaskID(1)
     return redirect('/')
 
 def deleteTask(form):
     key = form.key.data
     title = form.title.data
+
     if(key):
-        r.delete(key)
+        print(key, type(key))
+        db.tasks.delete_many({'id':int(key)})
     else:
-        for i in r.keys():
-            if i!='id' and r.hget(i,'title')==title:
-                print i
-                r.delete(i)
+        db.tasks.delete_many({'title':title})
+
     return redirect('/')
 
 def updateTask(form):
-    title = form.title.data
-    priority = form.priority.data
     key = form.key.data
     shortdesc = form.shortdesc.data
-    task = {'title':title,'shortdesc':shortdesc,'priority':priority}
+    
+    db.tasks.update_one(
+        {"id": int(key)},
+        {"$set":
+            {"shortdesc": shortdesc}
+        }
+    )
 
-    # update by "reset"
-    if(r.exists(key)):
-        r.hmset(key,task)
     return redirect('/')
 
 def resetTask(form):
-    r.flushall()
-    r.set('id','0')
+    db.tasks.drop()
+    db.settings.drop()
+    db.settings.insert_one({'name':'task_id', 'value':0})
     return redirect('/')
 
 @app.route('/', methods=['GET','POST'])
@@ -91,15 +82,14 @@ def main():
     if reset.validate_on_submit() and reset.reset.data:
         return resetTask(reset)
 
-    # get all data
-    keys = r.keys()
-    val = {}
-    for i in keys:
-        if i!='id':
-            val[i]=r.hgetall(i)
+    # read all data
+    docs = db.tasks.find()
+    data = []
+    for i in docs:
+        data.append(i)
 
     return render_template('home.html', cform = cform, dform = dform, uform = uform, \
-                keys = keys, val = val, reset = reset)
+            data = data, reset = reset)
 
 if __name__=='__main__':
     app.run(debug=True)
