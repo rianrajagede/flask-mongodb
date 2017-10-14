@@ -1,11 +1,17 @@
+import os
 from flask import Flask, render_template, redirect
 from pymongo import MongoClient
 from classes import *
 
+# get from env variable, follows 12 factor app (https://12factor.net/config)
+SECRET_KEY = os.getenv('SECRET_KEY', 'randomkeys')
+MONGODB_URL = os.getenv('MONGODB_URL', 'localhost:27017')
+PORT = os.getenv('PORT', '5000')
+
 # config system
 app = Flask(__name__)
-app.config.update(dict(SECRET_KEY='yoursecretkey'))
-client = MongoClient('localhost:27017')
+app.config.update(dict(SECRET_KEY=SECRET_KEY))
+client = MongoClient(MONGODB_URL)
 db = client.TaskManager
 
 if db.settings.find({'name': 'task_id'}).count() <= 0:
@@ -92,4 +98,10 @@ def main():
             data = data, reset = reset)
 
 if __name__=='__main__':
-    app.run(debug=True)
+    # The web server running in your container is listening for connections on port 5000
+    # #of the loopback network interface (127.0.0.1). As such this web server will only respond to http requests
+    # originating from that container itself.
+    # In order for the web server to accept connections originating from outside of the container
+    # you need to have it bind to the 0.0.0.0 IP address. 
+    # see answer here https://stackoverflow.com/a/26434706/5489910
+    app.run(host='0.0.0.0', port=PORT)
