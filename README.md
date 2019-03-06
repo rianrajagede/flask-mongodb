@@ -1,12 +1,14 @@
 # Simple CRUD-Web using MongoDB and Flask
 
-This is a simple example of Python Flask's usage as a simple "Task Manager" using MongoDB as Database Management System. We are using PyMongo as database connector.
+This is a simple example of Python Flask's usage as a simple "Task Manager".
+The Database Management System is MongoDB. 
+The python-MongoDB connector is PyMongo.
 
 ### Installation
 
 First, you should [install MongoDB](https://docs.mongodb.com/manual/installation/)
 
-then install all dependencies by run the following command:
+then install all dependencies by running the following command:
 
 ```
 $ sudo pip install -r requirements.txt
